@@ -22,6 +22,29 @@ let request = require('request');
     }
   };
 */
+const nextISSTimesForMyLocation = function (callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+      console.log("It didn't work!" , error);
+    }
+    console.log('It worked! Returned IP:' , ip);
+  });
+  fetchCoordsByIP('72.141.69.246', (err, coordinates) =>{
+    if (err) {
+      console.log("It didn't work!" , err);
+    } else {
+      console.log('Here are the longitude and the latitude:' , coordinates);
+    }
+    //console.log('Here are the longitude and the latitude:' , )
+  });
+  fetchISSFlyOverTimes({ latitude: '49.27670', longitude: '-123.13000' },(err, coords) => {
+    if (err) {
+      console.log('no such values for these coordinates', err);
+    } else {
+      console.log('the information that should be returned from response are:' , coords);
+    }
+  });
+}
 const fetchMyIP = function(callback) {
   
   request('https://api.ipify.org?format=json', (error, response, body) => {
@@ -89,5 +112,5 @@ const fetchISSFlyOverTimes = function(coords, callback) {
       return;
     }
   });
-};
-module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes};
+}
+module.exports = { nextISSTimesForMyLocation};
