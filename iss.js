@@ -7,7 +7,7 @@
  *   - The IP address as a string (null if error). Example: "162.245.144.188"
  */
 let request = require('request');
-const myJson =
+/*const myJson =
   {
     "status": "success",
     "data": {
@@ -21,7 +21,7 @@ const myJson =
       "longitude": "-122.08380"
     }
   };
-
+*/
 const fetchMyIP = function(callback) {
   
   request('https://api.ipify.org?format=json', (error, response, body) => {
@@ -43,7 +43,6 @@ const fetchMyIP = function(callback) {
   });
 };
 //const ip = fetchMyIP;
-
 const fetchCoordsByIP = function(ip, callback) {
   request(`https://api.ipgeolocationapi.com/geolocate/${ip}`,(error, response, body) => {
     if (error) {
@@ -51,16 +50,44 @@ const fetchCoordsByIP = function(ip, callback) {
       callback(error, null);
       console.log(body);
     } else {
-      const {latitude , longitude}= JSON.parse(body).geo;
+      const {latitude , longitude} = JSON.parse(body).geo;
       const objIp = { latitude, longitude};
+     
       callback(null, objIp);
     }
-    /*if (response.statusCode !== 200) {
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      
+    }
+  });
+};
+/**
+ * Makes a single API request to retrieve upcoming ISS fly over times the for the given lat/lng coordinates.
+ * Input:
+ *   - An object with keys `latitude` and `longitude`
+ *   - A callback (to pass back an error or the array of resulting data)
+ * Returns (via Callback):
+ *   - An error, if any (nullable)
+ *   - The fly over times as an array of objects (null if error). Example:
+ *     [ { risetime: 134564234, duration: 600 }, ... ]
+ */
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`http://api.open-notify.org/iss-now.json/?latitude=${coords['latitude']}&longitude=${coords['latitude']}`,(error, response, body) => {
+    if (error) {
+      console.log(error);
+      callback(error, null);
+      console.log(body);
+    } else {
+      const resp = JSON.parse(body);
+      console.log(resp);
+      callback(null, resp);
+    }
+    if (response.statusCode !== 200) {
       const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
       callback(Error(msg), null);
       return;
-    }*/
+    }
   });
-
 };
-module.exports = { fetchMyIP, fetchCoordsByIP };
+module.exports = { fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes};
