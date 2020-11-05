@@ -6,8 +6,24 @@
  *   - An error, if any (nullable)
  *   - The IP address as a string (null if error). Example: "162.245.144.188"
  */
+let request = require('request');
+const myJson =
+  {
+    "status": "success",
+    "data": {
+      "ipv4": "8.8.8.8",
+      "continent_name": "North America",
+      "country_name": "United States",
+      "subdivision_1_name": "California",
+      "subdivision_2_name": null,
+      "city_name": "Mountain View",
+      "latitude": "37.38600",
+      "longitude": "-122.08380"
+    }
+  };
+
 const fetchMyIP = function(callback) {
-  var request = require ('request');
+  
   request('https://api.ipify.org?format=json', (error, response, body) => {
 
     if (error) {
@@ -16,24 +32,35 @@ const fetchMyIP = function(callback) {
       console.log(body);
     } else {
       const data = JSON.parse(body);
-      callback(null, data['ip']);   
+      callback(null, data['ip']);
     }
-
-   // inside the request callback ...
-  // error can be set if invalid domain, user is offline, etc.
-  if (error) {
-    callback(error, null);
-    return;
-  }
-  // if non-200 status, assume server error
-  if (response.statusCode !== 200) {
-    const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
-    callback(Error(msg), null);
-    return;
-  }
+    // if non-200 status, assume server error
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
   });
-}
-  // if we get here, all's well and we got the data
+};
+//const ip = fetchMyIP;
 
+const fetchCoordsByIP = function(ip, callback) {
+  request(`https://api.ipgeolocationapi.com/geolocate/${ip}`,(error, response, body) => {
+    if (error) {
+      console.log(error);
+      callback(error, null);
+      console.log(body);
+    } else {
+      const {latitude , longitude}= JSON.parse(body).geo;
+      const objIp = { latitude, longitude};
+      callback(null, objIp);
+    }
+    /*if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }*/
+  });
 
-module.exports = { fetchMyIP };
+};
+module.exports = { fetchMyIP, fetchCoordsByIP };
